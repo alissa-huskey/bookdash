@@ -9,10 +9,7 @@ __all__ = ["BookElement", "Element"]
 class Element:
     """Element class providing shorthand methods for lxml objects"""
 
-    TITLE_PARSER_FULL = re.compile('^(?P<name>.*) \((?P<series>.*) #(?P<number>.*)\)$')
-    TITLE_PARSER = re.compile('^(?P<name>.*) \((?P<series>.*)$')
-
-    def __init__(self, element):
+    def __init__(self, element=None):
         """Set lxml element
 
             Params
@@ -50,16 +47,24 @@ class Element:
             name (str): attribute name
         """
         elm = self.first(path)
-        if elm is not None:
+        if elm is None:
             return
         return elm.attrib.get("id")
 
 class BookElement(Element):
     """A class for parsing a book tr from Goodreads search results"""
 
-    def __init__(self, element):
+    TITLE_PARSER_FULL = re.compile(r'^(?P<name>.*) \((?P<series>.*) #(?P<number>.*)\)$')
+    TITLE_PARSER = re.compile(r'^(?P<name>.*) \((?P<series>.*)\)$')
+
+    def __init__(self, element=None):
         """Parse book attributes from element"""
         super().__init__(element)
+        self._series = None
+        self.number = None
+        if self.element is None:
+            return
+
         self.id = self.attr('.//div[@class="u-anchorTarget"]', "id")
         self.author = self.first('.//span[@itemprop="author"]//span[@itemprop="name"]/text()')
         self.title = self.first('.//a[@class="bookTitle"]/span/text()')

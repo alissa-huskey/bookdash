@@ -12,11 +12,19 @@ __all__ = ["Book"]
 class Book:
     """Goodreads Books"""
 
-    ATTRS = ("id", "title", "author", "series", "number", "score")
+    ATTRS = {
+        'id': None,
+        'title': "property",
+        'author': None,
+        'series': "property",
+        'number': None,
+        'score': None,
+    }
 
     def __init__(self, element=None):
         """Initialize book attributes."""
-        for attr in self.ATTRS:
+        for attr, prop in self.ATTRS.items():
+            if prop: attr = f"_{attr}"
             setattr(self, attr, None)
         self.element = element
 
@@ -36,7 +44,7 @@ class Book:
     @element.setter
     def element(self, book):
         """."""
-        if not book:
+        if book is None:
             return
         if not isinstance(book, BookElement):
             book = BookElement(book)
