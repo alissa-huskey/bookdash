@@ -1,0 +1,9 @@
+{
+	"python.testing.pytestArgs": [
+		"tests"
+	],
+	"python.testing.unittestEnabled": false,
+	"python.testing.nosetestsEnabled": false,
+	"python.testing.pytestEnabled": true,
+	"python.testing.pytestPath": "/Users/alissahuskey/Library/Caches/pypoetry/virtualenvs/bookdash-ZqB9-uE8-py3.8/bin/pytest"
+}

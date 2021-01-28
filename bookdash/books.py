@@ -6,16 +6,19 @@ import re
 from .elements import BookElement
 
 
+__all__ = ["Book"]
+
+
 class Book:
     """Goodreads Books"""
 
     ATTRS = ("id", "title", "author", "series", "number", "score")
 
-    def __init__(self, element):
+    def __init__(self, element=None):
         """Initialize book attributes."""
-        book = BookElement(element)
         for attr in self.ATTRS:
-            setattr(self, attr, getattr(book, attr, None))
+            setattr(self, attr, None)
+        self.element = element
 
     def __repr__(self):
         return f"Book({self.title!r})"
@@ -24,6 +27,21 @@ class Book:
     def url(self) -> str:
         """Return the goodreads book url"""
         return f"https://www.goodreads.com/book/show/{self.id}"
+
+    @property
+    def element(self):
+        """."""
+        return self._element
+
+    @element.setter
+    def element(self, book):
+        """."""
+        if not book:
+            return
+        if not isinstance(book, BookElement):
+            book = BookElement(book)
+        for attr in self.ATTRS:
+            setattr(self, attr, getattr(book, attr, None))
 
     def match(self, params: dict):
         """Calculate a match score based on params"""
