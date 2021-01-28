@@ -1,7 +1,9 @@
+"""Module for the command line interface"""
+
 import click
 from tabulate import tabulate
 
-from . import client
+from . import clients
 from . import abort, log
 
 
@@ -32,7 +34,7 @@ def search(**kwargs):
     if not any(kwargs.values()):
         abort("Received no search arguments.")
 
-    api = client.Client()
+    api = clients.Client()
     books = api.search(**kwargs)
     rows = []
     for i, book in enumerate(books, 1):
