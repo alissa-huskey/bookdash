@@ -1,0 +1,47 @@
+import click
+from tabulate import tabulate
+
+from . import client
+from . import abort, log
+
+
+def trim(text, width) -> str:
+    """Return text trimmed to width"""
+    if not text:
+        return ""
+    text = str(text)
+    if len(text) <= width:
+        return text
+
+    return f"{text[0:width-3]}..."
+
+
+@click.command(context_settings={"ignore_unknown_options": True}, options_metavar="[<filters>]")
+@click.option("-t", "--title", help="filter by book title")
+@click.option("-a", "--author", help="filter by book author")
+@click.option("-s", "--series", help="filter by book series")
+@click.option('--save/--no-save', '-S/', default=False, help="save requested contents for debugging")
+@click.argument("query", nargs=-1, metavar="[<title>]")
+def search(**kwargs):
+    """Search for book and print details."""
+
+    log(prefix="cli.search() kwargs:", **kwargs)
+    if kwargs["query"]:
+        kwargs["title"] = " ".join(kwargs.pop("query"))
+
+    if not any(kwargs.values()):
+        abort("Received no search arguments.")
+
+    api = client.Client()
+    books = api.search(**kwargs)
+    rows = []
+    for i, book in enumerate(books, 1):
+        rows.append({
+            '#': i,
+            'Title': trim(book.title, 60),
+            'Author': book.author,
+            'Series': trim(book.series, 40),
+        })
+
+    print()
+    print(tabulate(rows, headers="keys"))

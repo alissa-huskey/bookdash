@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+
+"""Write shell.py file to start project shell"""
+
+import os
+import configparser
+
+
+TOOLSDIR = os.path.dirname(__file__)
+ROOTDIR = os.path.join(TOOLSDIR, "..")
+
+
+class Project:
+    """Class for project info read from pyproject.toml"""
+    file: str
+    name: str
+    version: str
+    modules: list
+
+    def __init__(self):
+        self.file = os.path.join(ROOTDIR, "pyproject.toml")
+        parser = configparser.ConfigParser()
+        parser.read(self.file)
+        self.modules = list(parser["tool.poetry.dependencies"].keys())
+        self.modules.remove("python")
+        self.modules.append("os")
+        self.name = parser["tool.poetry"]["name"].strip('"')
+        self.version = parser["tool.poetry"]["version"].strip('"')
+
+    def header(self):
+        """Print the project name and version"""
+        return f"{self.name} v {self.version}"
+
+
+def main():
+    """Write shell init.py file"""
+    project = Project()
+    with open(os.path.join(TOOLSDIR, "shell.py"), "w") as out:
+        out.write('''"""
+Project shell initializer
+   Generated from tools/mkshell
+   To run: poetry run python -i tools/shell.py
+"""\n\n''')
+
+        for module in project.modules:
+            out.write(f"import {module}\n")
+        out.write("\n\nROOTDIR = os.getcwd()\n")
+        out.write(f"\n\nprint('{project.header()}')\n")
+
+
+if __name__ == "__main__":
+    main()
