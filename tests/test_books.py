@@ -1,11 +1,15 @@
 from bookdash.books import Book
-from bookdash.elements.book_element import BookElement
+from bookdash.elements.found_book_element import FoundBookElement
 
 from . import Stub
 
 
 def test_init():
-    book = Book(Stub(klass=BookElement, title="Vicious", author="V.E. Schwab"))
+    book = Book(Stub(
+        klass=FoundBookElement,
+        title="Vicious",
+        author="V.E. Schwab"
+    ))
     assert book.title == "Vicious"
     assert book.author == "V.E. Schwab"
 
@@ -17,14 +21,22 @@ def test_url():
 
 
 def test_element_setter():
-    element = Stub(klass=BookElement, title="Vicious", author="V.E. Schwab")
+    element = Stub(
+        klass=FoundBookElement,
+        title="Vicious",
+        author="V.E. Schwab"
+    )
     book = Book(element)
 
     assert book.element == element
 
 
 def test_element_getter():
-    element = Stub(klass=BookElement, title="Vicious", author="V.E. Schwab")
+    element = Stub(
+        klass=FoundBookElement,
+        title="Vicious",
+        author="V.E. Schwab"
+    )
     book = Book()
     book._element = element
 
@@ -32,7 +44,11 @@ def test_element_getter():
 
 
 def test_element_getter():
-    element = Stub(klass=BookElement, title="Vicious", author="V.E. Schwab")
+    element = Stub(
+        klass=FoundBookElement,
+        title="Vicious",
+        author="V.E. Schwab"
+    )
     book = Book(element)
 
     assert book.element == element

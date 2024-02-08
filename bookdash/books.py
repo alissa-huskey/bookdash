@@ -5,7 +5,7 @@ from difflib import SequenceMatcher
 
 from lxml.html import HtmlElement
 
-from .elements.book_element import BookElement
+from .elements.found_book_element import FoundBookElement
 
 __all__ = ["Book"]
 
@@ -49,13 +49,13 @@ class Book:
         return self._element
 
     @element.setter
-    def element(self, book) -> BookElement:
+    def element(self, book) -> FoundBookElement:
         """Element setter."""
         if book is None:
             return
 
-        if not isinstance(book, BookElement):
-            book = BookElement(book)
+        if not isinstance(book, FoundBookElement):
+            book = FoundBookElement(book)
 
         for attr in self.ATTRS:
             setattr(self, attr, getattr(book, attr, None))

@@ -1,4 +1,4 @@
-"""A module for parsing data from HTML elements."""
+"""A module for parsing book data from the a Goodreads search results row."""
 
 import re
 
@@ -9,7 +9,7 @@ from .element import Element
 __all__ = ["Element"]
 
 
-class BookElement(Element):
+class FoundBookElement(Element):
     """A class for parsing a book tr from Goodreads search results."""
 
     TITLE_PARSER_FULL = re.compile(
