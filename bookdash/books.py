@@ -5,7 +5,7 @@ from difflib import SequenceMatcher
 
 from lxml.html import HtmlElement
 
-from .elements import BookElement
+from .elements.book_element import BookElement
 
 __all__ = ["Book"]
 

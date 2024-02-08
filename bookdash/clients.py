@@ -7,7 +7,9 @@ from more_itertools import first
 
 from . import abort, log
 from .books import Book
-from .elements import Element
+from .elements.element import Element
+
+__all__ = ["Client"]
 
 
 class Client:

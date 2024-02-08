@@ -1,7 +1,9 @@
+"""."""
+
+import logging
+from functools import partialmethod
 from os import environ
 from sys import stderr
-from functools import partialmethod
-import logging
 
 from click import style
 
@@ -9,8 +11,9 @@ __all__ = ["__version__", "abort", "log"]
 
 __version__ = "0.1.0"
 
+
 def abort(*args):
-    """print message to stderr and exit"""
+    """Print message to stderr and exit."""
     print(style("Error", fg="red"), *args, file=stderr)
     exit(1)
 
@@ -22,14 +25,13 @@ class Logger:
     WIDTH = 75
 
     def __init__(self, level="debug", enabled=True):
-        """Create and configure logger object
+        """Create and configure logger object.
 
-           Params
-           ------
-           level (str, default: "debug):  log level
-           enabled (bool, default: True): flag to enable log
+        Params
+        ------
+        level (str, default: "debug):  log level
+        enabled (bool, default: True): flag to enable log
         """
-
         if enabled:
             self.handler = logging.StreamHandler(stream=stderr)
         else:
@@ -52,7 +54,7 @@ class Logger:
         self.debug(*args, **kwargs)
 
     def write(self, level=None, *args, **kwargs):
-        """Create a formatted log message"""
+        """Create a formatted log message."""
         if not level:
             level = self.level
         if not isinstance(level, int):
@@ -65,11 +67,11 @@ class Logger:
     fatal = partialmethod(write, "FATAL")
 
     def line(self):
-        """Create line in the log"""
-        self.write(self.level, style("-"*self.WIDTH, fg="cyan"))
+        """Create line in the log."""
+        self.write(self.level, style("-" * self.WIDTH, fg="cyan"))
 
     def initmsg(self):
-        """Write a message when logger is created"""
+        """Write a message when logger is created."""
         self.write()
         self.line()
         self.write(self.level, __package__)
@@ -77,7 +79,7 @@ class Logger:
         self.write()
 
     def message(self, *args, **kwargs) -> str:
-        """Return a formatted log message
+        """Return a formatted log message.
 
         Params
         ------
@@ -90,11 +92,13 @@ class Logger:
             prefix = style(kwargs.pop("prefix"), fg="cyan")
             args = [f"{prefix}"]
         if kwargs:
-            text += [f"{style(k, fg='yellow')}: {v!r}" for k,v in kwargs.items()]
+            text += [f"{style(k, fg='yellow')}: {v!r}"
+                     for k, v in kwargs.items()]
         if not text:
             return ""
 
         return " ".join(map(str, text))
+
 
 Logger.WIDTH = environ.get("COLUMNS", Logger.WIDTH)
 log = Logger()

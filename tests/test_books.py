@@ -1,5 +1,5 @@
 from bookdash.books import Book
-from bookdash.elements import BookElement
+from bookdash.elements.book_element import BookElement
 
 from . import Stub
 
