@@ -88,12 +88,14 @@ def test_login(filecontents):  # noqa
     {'filename': "goodreads-search.html"}
 ], indirect=True)
 def test_search(filecontents):  # noqa
-    api = Client()
-    params = {'q': "ender's game", 'search[field]': "title"}
+    api = Client(title="ender's game")
+
     with requests_mock.Mocker() as m:
         m.get("https://www.goodreads.com/search", text=filecontents)
-        books = api.search(title="ender's game")
+        books = api.search()
     response = api.responses[-1]
+
+    params = {'q': "ender's game", 'search[field]': "title"}
     assert response.request.path_url == f"/search?{encode(params)}"
     assert books
 
@@ -102,12 +104,14 @@ def test_search(filecontents):  # noqa
     {'filename': "goodreads-search.html"}
 ], indirect=True)
 def test_search_title(filecontents):  # noqa
-    api = Client()
-    params = {'q': "ender's game", 'search[field]': "title"}
+    api = Client(title="ender's game")
+
     with requests_mock.Mocker() as m:
         m.get("https://www.goodreads.com/search", text=filecontents)
-        books = api.search(title="ender's game")
+        books = api.search()
     response = api.responses[-1]
+
+    params = {'q': "ender's game", 'search[field]': "title"}
     assert response.request.path_url == f"/search?{encode(params)}"
     assert books
 
@@ -116,12 +120,14 @@ def test_search_title(filecontents):  # noqa
     {'filename': "goodreads-search.html"}
 ], indirect=True)
 def test_search_author(filecontents):  # noqa
-    api = Client()
-    params = {'q': "orson scott card", 'search[field]': "author"}
+    api = Client(author="orson scott card")
+
     with requests_mock.Mocker() as m:
         m.get("https://www.goodreads.com/search", text=filecontents)
-        books = api.search(author="orson scott card")
+        books = api.search()
     response = api.responses[-1]
+
+    params = {'q': "orson scott card", 'search[field]': "author"}
     assert response.request.path_url == f"/search?{encode(params)}"
     assert books
 
@@ -130,34 +136,24 @@ def test_search_author(filecontents):  # noqa
     {'filename': "goodreads-search.html"}
 ], indirect=True)
 def test_search_multi(filecontents):  # noqa
-    api = Client()
-    params = {'q': "ender's game orson scott card", 'search[field]': "all"}
+    api = Client(title="ender's game", author="orson scott card")
+
     with requests_mock.Mocker() as m:
         m.get("https://www.goodreads.com/search", text=filecontents)
-        books = api.search(title="ender's game", author="orson scott card")
+        books = api.search()
     response = api.responses[-1]
+
+    params = {'q': "ender's game orson scott card", 'search[field]': "all"}
     assert response.request.path_url == f"/search?{encode(params)}"
     assert books
 
 
-@pytest.mark.skip("""
-    need to refactor to raise exception instead of exiting;
-    also probably rework this test
-""")
+@pytest.mark.skip("""need to refactor to raise exception instead of exiting""")
 @pytest.mark.parametrize("filecontents", [
     {'filename': "todo.json"}
 ], indirect=True)
 def test_failed_request(filecontents):
-    api = Client()
-    url = "https://jsonplaceholder.typicode.com/todos/1"
-    with requests_mock.Mocker() as m:
-        m.register_uri("GET", url, exc=requests.exceptions.ConnectTimeout)
-        m.get(url, text=filecontents)
-        response = api.request("GET", url)
-
-    breakpoint()
-
-    assert response.text == filecontents
+    ...
 
 
 @pytest.mark.skip("need to refactor to raise exception instead of exiting")

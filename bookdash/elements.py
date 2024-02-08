@@ -1,64 +1,69 @@
-"""A module for parsing data from HTML elements"""
+"""A module for parsing data from HTML elements."""
+
+import re
 
 import lxml.html as parser
 from more_itertools import first, padded
-import re
 
 __all__ = ["BookElement", "Element"]
 
+
 class Element:
-    """Element class providing shorthand methods for lxml objects"""
+    """Element class providing shorthand methods for lxml objects."""
 
     def __init__(self, element=None):
-        """Set lxml element
+        """Set lxml element.
 
-            Params
-            ------
-            element (str, lxml.html.HtmlElement): element object or string to generate one
+        Params
+        ------
+        element (str, parser.HtmlElement): Element or string to generate one
         """
         if isinstance(element, str):
             element = parser.fromstring(element)
         self.element = element
 
     def xpath(self, path) -> list:
-        """Return the list of objects for path
+        """Return the list of objects for path.
 
-            Params
-            ------
-            path (str): xpath
+        Params
+        ------
+        path (str): xpath
         """
         return self.element.xpath(path)
 
     def first(self, path) -> object:
-        """Return the first object for path or None
+        """Return the first object for path or None.
 
-            Params
-            ------
-            path (str): xpath
+        Params
+        ------
+        path (str): xpath
         """
         return first(self.xpath(path), None)
 
     def attr(self, path, name) -> object:
-        """Return the attr for name of the first object for path or None
+        """Return the attr for name of the first object for path or None.
 
-            Params
-            ------
-            path (str): xpath
-            name (str): attribute name
+        Params
+        ------
+        path (str): xpath
+        name (str): attribute name
         """
         elm = self.first(path)
         if elm is None:
             return
         return elm.attrib.get("id")
 
-class BookElement(Element):
-    """A class for parsing a book tr from Goodreads search results"""
 
-    TITLE_PARSER_FULL = re.compile(r'^(?P<name>.*) \((?P<series>.*) #(?P<number>.*)\)$')
+class BookElement(Element):
+    """A class for parsing a book tr from Goodreads search results."""
+
+    TITLE_PARSER_FULL = re.compile(
+        r'^(?P<name>.*) \((?P<series>.*) #(?P<number>.*)\)$'
+    )
     TITLE_PARSER = re.compile(r'^(?P<name>.*) \((?P<series>.*)\)$')
 
     def __init__(self, element=None):
-        """Parse book attributes from element"""
+        """Parse book attributes from element."""
         super().__init__(element)
         self._series = None
         self.number = None
@@ -66,18 +71,19 @@ class BookElement(Element):
             return
 
         self.id = self.attr('.//div[@class="u-anchorTarget"]', "id")
-        self.author = self.first('.//span[@itemprop="author"]//span[@itemprop="name"]/text()')
+        self.author = self.first(
+            './/span[@itemprop="author"]//span[@itemprop="name"]/text()'
+        )
         self.title = self.first('.//a[@class="bookTitle"]/span/text()')
 
     @property
     def title(self):
-        """title getter"""
+        """Title getter."""
         return self._title
 
     @title.setter
     def title(self, value):
-        """Title setter that parses any series and number from title"""
-
+        """Title setter that parses any series and number from title."""
         if "(" in value:
             match = self.TITLE_PARSER_FULL.search(value)
             if not match:
@@ -92,12 +98,12 @@ class BookElement(Element):
 
     @property
     def series(self):
-        """Series getter"""
+        """Series getter."""
         return self._series
 
     @series.setter
     def series(self, value):
-        """Series setter that removes trailing comma"""
+        """Series setter that removes trailing comma."""
         if value.endswith(","):
             value = value[0:-1]
 

@@ -17,11 +17,31 @@ class Client:
             "AppleWebKit/601.3.9 (KHTML, like Gecko) " \
             "Version/9.0.2 Safari/601.3.9"
 
-    def __init__(self):
-        """Create session."""
+    def __init__(self, **kwargs):
+        """Create session.
+
+        Params
+        ------
+        title (str): title to filter by
+        author (str): author to filter by
+        series (str): series to filter by
+        query (str): submit query and return all results
+        save (bool): save response content for debugging
+        """
         self.responses = []
         self.session = requests.session()
         self.session.headers.update({'user-agent': self.AGENT})
+
+        self.save = kwargs.pop("save", False)
+
+        self.query = {key: val for key, val in kwargs.items()
+                      if val and key in ("query", "title", "author", "series")}
+
+        self.search_by = "all"
+
+        attrs = self.query.keys()
+        if len(attrs) == 1 and first(attrs) in ["title", "author"]:
+            self.search_by = first(attrs)
 
     def request(self, method, url, **kwargs):
         """Make a session request."""
@@ -31,6 +51,7 @@ class Client:
             abort(f"Request to {url} failed:", "\n", response.status_code,
                   response.reason)
         return response
+
     get = partialmethod(request, "GET")
     post = partialmethod(request, "POST")
     options = partialmethod(request, "OPTIONS")
@@ -61,48 +82,37 @@ class Client:
             data=data,
         )
 
-    def search(self, **kwargs) -> list:
+    def search(self) -> list:
         """Submit a query to goodreads and return a list of Book objects.
-
-        Params
-        ------
-        title (str): title to filter by
-        author (str): author to filter by
-        series (str): series to filter by
-        query (str): submit query and return all results
-        save (bool): save response content for debugging
 
         Examples
         --------
-        >>> api = Client()
-        >>> api.search(title="ender's game", author="orson scott card")
+        >>> api = Client(title="ender's game", author="orson scott card")
+        >>> api.search()
         [Book('Ender’s Game')]
         """
-        save = kwargs.pop("save", False)
-        search_by = "all"
-        kwargs = {key: val for key, val in kwargs.items()
-                  if val and key in ("query", "title", "author", "series")}
-        attrs = kwargs.keys()
+        query = " ".join(self.query.values())
+        response = self.get(
+            "https://www.goodreads.com/search",
+            params={'q': query, 'search[field]': self.search_by}
+        )
 
-        if len(attrs) == 1 and first(attrs) in ["title", "author"]:
-            search_by = first(kwargs.keys())
-
-        query = " ".join(kwargs.values())
-        response = self.get("https://www.goodreads.com/search",
-                            params={'q': query, 'search[field]': search_by})
         # log(path_url=response.request.path_url)
         log(url=response.url)
-        log(prefix="Client.search() query:", query=query, search_by=search_by)
+        log(
+            prefix="Client.search() query:", query=query,
+            search_by=self.search_by
+        )
 
         doc = Element(response.text)
-        if save:
+        if self.save:
             with open("goodreads-search.html", "w") as fp:
                 fp.write(response.text)
 
         books = []
         for elm in doc.xpath('//tr[@itemtype="http://schema.org/Book"]'):
             book = Book(elm)
-            book.match(kwargs)
+            book.match(self.query)
             books.append(book)
 
         books = sorted(books, key=lambda b: b.score, reverse=True)

@@ -35,8 +35,8 @@ def search(**kwargs):
     if not any(kwargs.values()):
         abort("Received no search arguments.")
 
-    api = clients.Client()
-    books = api.search(**kwargs)
+    api = clients.Client(**kwargs)
+    books = api.search()
     rows = []
     for i, book in enumerate(books, 1):
         rows.append({

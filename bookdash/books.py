@@ -1,7 +1,9 @@
-"""Module for Book objects."""
+"""Module for Book objects, which store information about a book."""
 
 import re
 from difflib import SequenceMatcher
+
+from lxml.html import HtmlElement
 
 from .elements import BookElement
 
@@ -22,13 +24,15 @@ class Book:
 
     MATCH_FILTERER = re.compile(r"(?!\w|\s).")
 
-    def __init__(self, element=None):
+    def __init__(self, element: HtmlElement = None, id: int = None):
         """Initialize book attributes."""
         for attr, prop in self.ATTRS.items():
             if prop:
                 attr = f"_{attr}"
             setattr(self, attr, None)
+
         self.element = element
+        self.id = id
 
     def __repr__(self):
         """Book class repr."""
@@ -45,14 +49,18 @@ class Book:
         return self._element
 
     @element.setter
-    def element(self, book):
+    def element(self, book) -> BookElement:
         """Element setter."""
         if book is None:
             return
+
         if not isinstance(book, BookElement):
             book = BookElement(book)
+
         for attr in self.ATTRS:
             setattr(self, attr, getattr(book, attr, None))
+
+        self._element = book
 
     def normalize(self, text):
         """Normalize text for search."""

@@ -11,9 +11,31 @@ def test_init():
 
 
 def test_url():
+    book_id = "19089701"
+    book = Book(id=book_id)
+    assert book.url == f"https://www.goodreads.com/book/show/{book_id}"
+
+
+def test_element_setter():
+    element = Stub(klass=BookElement, title="Vicious", author="V.E. Schwab")
+    book = Book(element)
+
+    assert book.element == element
+
+
+def test_element_getter():
+    element = Stub(klass=BookElement, title="Vicious", author="V.E. Schwab")
     book = Book()
-    book.id = "19089701"
-    assert book.url == "https://www.goodreads.com/book/show/19089701"
+    book._element = element
+
+    assert book.element == element
+
+
+def test_element_getter():
+    element = Stub(klass=BookElement, title="Vicious", author="V.E. Schwab")
+    book = Book(element)
+
+    assert book.element == element
 
 
 def test_match():
