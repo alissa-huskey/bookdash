@@ -1,8 +1,7 @@
-import pytest
-
-from . import Stub
 from bookdash.books import Book
 from bookdash.elements import BookElement
+
+from . import Stub
 
 
 def test_init():

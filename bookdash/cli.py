@@ -1,14 +1,13 @@
-"""Module for the command line interface"""
+"""Module for the command line interface."""
 
 import click
 from tabulate import tabulate
 
-from . import clients
-from . import abort, log
+from . import abort, clients, log
 
 
 def trim(text, width) -> str:
-    """Return text trimmed to width"""
+    """Return text trimmed to width."""
     if not text:
         return ""
     text = str(text)
@@ -18,16 +17,18 @@ def trim(text, width) -> str:
     return f"{text[0:width-3]}..."
 
 
-@click.command(context_settings={"ignore_unknown_options": True}, options_metavar="[<filters>]")
+@click.command(context_settings={"ignore_unknown_options": True},
+               options_metavar="[<filters>]")
 @click.option("-t", "--title", help="filter by book title")
 @click.option("-a", "--author", help="filter by book author")
 @click.option("-s", "--series", help="filter by book series")
-@click.option('--save/--no-save', '-S/', default=False, help="save requested contents for debugging")
+@click.option('--save/--no-save', '-S/', default=False,
+              help="save requested contents for debugging")
 @click.argument("query", nargs=-1, metavar="[<title>]")
 def search(**kwargs):
     """Search for book and print details."""
-
     log(prefix="cli.search() kwargs:", **kwargs)
+
     if kwargs["query"]:
         kwargs["title"] = " ".join(kwargs.pop("query"))
 
