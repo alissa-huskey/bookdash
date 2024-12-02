@@ -6,7 +6,7 @@ import requests_mock
 
 from bookdash.clients import Client
 
-from . import filecontents
+bp = breakpoint
 
 
 def encode(data: dict) -> str:
@@ -59,6 +59,7 @@ def test_partial(filecontents):  # noqa
     assert response.text == filecontents
 
 
+@pytest.mark.skip("need to rewrite--goodreads changed their auth process")
 @pytest.mark.parametrize("filecontents", [
     {'filename': "goodreads-signin.html"}
 ], indirect=True)
@@ -179,3 +180,6 @@ def test_search_with_save():
 @pytest.mark.skip("need to figure out what this should do")
 def test_search_query():
     ...
+
+
+

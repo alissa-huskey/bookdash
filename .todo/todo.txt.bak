@@ -1,0 +1,19 @@
+2024-02-07 move credentials from _private.py to somewhere better
+2024-12-01 @feature add amazon lookup
+2024-12-01 @feature add audible lookup
+2024-12-01 @feature add notes
+2024-12-01 store info to database
+2024-12-01 @bug @test test_clients::test_login -- mock request failure
+2024-12-01 reorgainze: clients.py -> clients/goodreads.py
+2024-12-01 reorgainze: elements/*.py -> parsers/goodreads/*.py
+2024-12-02 @feature notes on authors
+2024-12-02 @feature read next lists -- notes, status (bought, available), reason, account
+2024-12-02 @feature ratings (PG/PG-13/R/X)
+2024-12-02 @feature don't read lists
+2024-12-02 @feature browser plugin -- like fakespot for audible; don't read
+2024-12-02 @feature owned on (kindle/audible/physical, which account)
+2024-12-02 @feature recommended by
+2024-12-02 @feature synopsis
+2024-12-02 @feature pending series, ie waiting for next book
+2024-12-02 @feature genres
+2024-12-02 @feature recommended lists

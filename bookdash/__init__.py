@@ -3,7 +3,7 @@
 import logging
 from functools import partialmethod
 from os import environ
-from sys import stderr
+from sys import exit, stderr
 
 from click import style
 
@@ -12,9 +12,15 @@ __all__ = ["__version__", "abort", "log"]
 __version__ = "0.1.0"
 
 
+def error(*args):
+    """Print message to stderr."""
+    print(style("Error", fg="red"), *args, file=stderr)
+    exit(1)
+
+
 def abort(*args):
     """Print message to stderr and exit."""
-    print(style("Error", fg="red"), *args, file=stderr)
+    error(*args)
     exit(1)
 
 

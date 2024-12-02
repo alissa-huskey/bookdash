@@ -3,7 +3,7 @@ import pytest
 
 from bookdash.elements.element import Element
 
-from .. import filecontents
+#  from .. import filecontents
 
 
 @pytest.mark.parametrize("filecontents", [

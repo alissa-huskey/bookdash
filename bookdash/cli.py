@@ -1,9 +1,13 @@
 """Module for the command line interface."""
 
 import click
+from click import prompt
+from rich import print as rprint
 from tabulate import tabulate
 
-from . import abort, clients, log
+from . import abort, clients, error, log
+
+bp = breakpoint
 
 
 def trim(text, width) -> str:
@@ -45,6 +49,9 @@ def search(**kwargs):
             'Author': book.author,
             'Series': trim(book.series, 40),
         })
+
+    if not rows:
+        return
 
     print()
     print(tabulate(rows, headers="keys"))

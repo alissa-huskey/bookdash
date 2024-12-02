@@ -3,7 +3,7 @@ import pytest
 
 from bookdash.elements.found_book_element import FoundBookElement
 
-from .. import filecontents
+bp = breakpoint
 
 
 @pytest.mark.parametrize("filecontents",
@@ -14,7 +14,7 @@ def test_book_parsing(filecontents):
     assert book.title == "Ender's Game"
     assert book.author == "Orson Scott Card"
     assert book.series == "Ender's Saga"
-    assert book.number == "1"
+    assert book.number == 1
 
 
 def test_book_title():
@@ -38,7 +38,7 @@ def test_book_title_with_series_and_num():
     book.title = "The End Game (Love Games #2)"
     assert book.title == "The End Game"
     assert book.series == "Love Games"
-    assert book.number == "2"
+    assert book.number == 2
 
 
 def test_book_title_with_series_and_num_and_comma():
@@ -46,7 +46,7 @@ def test_book_title_with_series_and_num_and_comma():
     book.title = "Ender's Game (Ender's Saga, #1)"
     assert book.title == "Ender's Game"
     assert book.series == "Ender's Saga"
-    assert book.number == "1"
+    assert book.number == 1
 
 
 def test_book_series():

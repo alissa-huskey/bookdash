@@ -1,6 +1,9 @@
 """A module for parsing data from HTML elements."""
 
 import lxml.html as parser
+from bs4 import BeautifulSoup
+from lxml import etree
+from lxml.etree import ParseError
 from more_itertools import first
 
 __all__ = ["Element"]
@@ -16,9 +19,26 @@ class Element:
         ------
         element (str, parser.HtmlElement): Element or string to generate one
         """
+        if element is None:
+            self.raw = ""
+            self.element = None
+            return
+
         if isinstance(element, str):
-            element = parser.fromstring(element)
+            self.raw = element
+            try:
+                element = parser.fromstring(element)
+            except (BaseException, ParseError):
+                element = None
+        else:
+            self.raw = etree.tostring(element)
+
         self.element = element
+
+    @property
+    def doc(self):
+        """Return a BeautifulSoup document."""
+        return BeautifulSoup(self.raw, "html.parser")
 
     def xpath(self, path) -> list:
         """Return the list of objects for path.

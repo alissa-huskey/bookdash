@@ -3,11 +3,15 @@
 from functools import partialmethod
 
 import requests
+from bs4 import BeautifulSoup
+#  from bs4.element import Tag
 from more_itertools import first
 
 from . import abort, log
 from .books import Book
 from .elements.element import Element
+
+bp = breakpoint
 
 __all__ = ["Client"]
 
@@ -64,25 +68,41 @@ class Client:
 
     def login(self, email, password):
         """Login to goodreads."""
-        response = self.get("https://www.goodreads.com/user/sign_in")
-        doc = Element(response.text)
-        form = doc.first('//*[@id="emailForm"]/form/fieldset')
+        session = requests.session()
+        uri = (
+            "https://www.goodreads.com/ap/signin?"
+            "language=en_US&"
+            "openid.assoc_handle=amzn_goodreads_web_na&"
+            "openid.claimed_id="
+            "http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&"
+            "openid.identity="
+            "http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&"
+            "openid.mode=checkid_setup&"
+            "openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&"
+            "openid.pape.max_auth_age=0&"
+            "openid.return_to="
+            "https%3A%2F%2Fwww.goodreads.com%2Fap-handler%2Fsign-in&"
+            "siteState=82c1c48f25348642eb3f5395d8cb8c50"
+        )
+        response = session.get(uri)
 
-        if form is None:
+        doc = Element(response.text).doc
+        form = first(doc.find_all("form", attrs=dict(name="signIn")))
+        #  tags = [t for t in form.descendants if isinstance(t, Tag)]
+
+        if not form:
             abort("Login form not found")
 
         # populate post data from signin page form fields
-        data = {field.name: field.value for field in form.xpath('//input')
-                if not field.name.startswith("user")}
-        data.update({
-            'user[email]': email,
-            'user[password]': password,
-        })
+        data = {field.attrs["name"]: field.attrs["value"]
+                for field in form.find_all("input")
+                if "value" in field.attrs}
+        data.update({'email': email, 'password': password})
 
-        return self.session.post(
-            "https://www.goodreads.com/user/sign_in",
-            data=data,
-        )
+        rsp = session.post(uri, data=data)
+        doc = BeautifulSoup(rsp.text, "html.parser")
+        breakpoint()
+        print
 
     def search(self) -> list:
         """Submit a query to goodreads and return a list of Book objects.
@@ -128,3 +148,7 @@ class Client:
 
         books = matches
         return books
+
+    def show(self):
+        """Submit a request to show a book by ID and return the details for
+        that book."""
