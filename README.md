@@ -29,3 +29,10 @@ Options:
 ### Setup
 
 Copy `bookdash/private.py` to `bookdash/_private.py` and edit with your login info.
+
+Status
+------
+
+**Pre-Alpha**: broken
+
+Goodreads authentication needs to be refactored.

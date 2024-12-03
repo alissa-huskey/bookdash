@@ -55,3 +55,24 @@ def search(**kwargs):
 
     print()
     print(tabulate(rows, headers="keys"))
+
+    row = None
+
+    if len(rows) == 1:
+        row = rows [0]
+
+    while not row:
+        response = prompt("Book #> ", type=int)
+
+        try:
+            row = rows[response-1]
+        except IndexError:
+            error("Invalid book number. Try again.")
+
+    show(row.id)
+
+
+def show(url):
+    """Show book details."""
+
+    rprint(row)
