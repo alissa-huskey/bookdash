@@ -25,3 +25,7 @@ class Stub:
             self.__class__ = klass
         for k, v in kwargs.items():
             setattr(self, k, v)
+
+    def __getattr__(self, name):
+        """Return None if attr is missing."""
+        return None
