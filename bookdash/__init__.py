@@ -12,6 +12,22 @@ __all__ = ["__version__", "abort", "log"]
 __version__ = "0.1.0"
 
 
+class BookdashException(BaseException):
+    """Bookdash exceptions."""
+
+
+class UserError(BookdashException):
+    """Errors that occured because of user behavior."""
+
+
+class SystemError(BookdashException):
+    """Errors that occured because of something wrong with the system."""
+
+
+class ProgramError(BookdashException):
+    """Errors that occured because something is broken."""
+
+
 def error(*args):
     """Print message to stderr."""
     print(style("Error", fg="red"), *args, file=stderr)

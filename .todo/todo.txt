@@ -4,7 +4,6 @@
 2024-12-01 @feature add notes
 2024-12-01 store info to database
 2024-12-01 @bug @test test_clients::test_login -- mock request failure
-2024-12-01 reorgainze: clients.py -> clients/goodreads.py
 2024-12-01 reorgainze: elements/*.py -> parsers/goodreads/*.py
 2024-12-02 @feature notes on authors
 2024-12-02 @feature read next lists -- notes, status (bought, available), reason, account
