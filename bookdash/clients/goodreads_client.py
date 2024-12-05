@@ -8,8 +8,9 @@ from more_itertools import first
 
 from bookdash import abort, log
 from bookdash.books import Book
-from bookdash.elements.element import Element
+from bookdash.browser import Browser
 from bookdash.clients.base_client import BaseClient
+from bookdash.elements.element import Element
 
 bp = breakpoint
 
@@ -18,6 +19,8 @@ __all__ = ["GoodreadsClient"]
 
 class GoodreadsClient(BaseClient):
     """Goodreads client."""
+
+    BASE_URL = "https://goodreads.com"
 
     def __init__(self, **kwargs):
         """Goodreads client.
@@ -48,8 +51,68 @@ class GoodreadsClient(BaseClient):
 
         super().__init__(**kwargs)
 
+    def save_cookies(self, cookies):
+        """Save cookies to pickled file."""
+        # open cookie file
+        # write pickled cookies
+
+    def load_cookies(self):
+        """Load cookies from pickled file."""
+        # open cookie file if it exists
+        # unpickle
+        # ensure they're not expired
+        # add to session
+        # return cookies
+
     def login(self, email, password):
         """Login to goodreads."""
+        # if we have valid cookies cached, we're already logged in
+        if self.load_cookies():
+            return True
+
+        browser = self.browser = Browser(user_data_dir="tmp/selenium")
+
+        # go to the user-facing signin page
+        browser.get(f"{self.BASE_URL}/user/sign_in")
+
+        # check if the user is already signed in
+        # (if they have a session-token cookie and are redirected to the home page)
+        cookies = [c["name"] for c in browser.get_cookies()]
+        if "session-token" in cookies and browser.current_url == f"{self.BASE_URL}/":
+            self.save_cookies(cookies)
+            return True
+
+        # click the "Sign in with email" button
+        signin_btn = browser.find_xpath("//button[normalize-space(text())='Sign in with email']")
+        signin_btn.click()
+
+        #  fill in the form and submit it
+        email_field = browser.find_xpath(".//input[@name='email']")
+        browser.type_slowly(email_field, email)
+
+        pwd_field = browser.find_xpath(".//input[@name='password']")
+        browser.type_slowly(pwd_field, password)
+
+        submit_btn = browser.find_xpath(".//input[@id='signInSubmit']")
+        submit_btn.click()
+
+        # check for normal signin error (ie. wrong password)
+        error = browser.find_xpath(".//div[@id='passkey-error-alert']", quiet=True)
+        assert not error or not error.is_displayed(), "Error loading signin page."
+
+        # look for driver-related errors (ie. Javascript disabled)
+        error = browser.find_xpath(".//div[@id='auth-error-message-box']", quiet=True)
+        assert not error or not error.is_displayed(), "Error submitting credentials."
+
+        # look for CAPTCHA
+        assert browser.driver.title != f"Authentication required", "Problem submitting signin (possibly CAPTCHA)."
+
+        # save the cookies
+        self.save_cookies(browser.get_cookies())
+
+        current_url = browser.current_url
+        browser.quit()
+        return current_url
 
     def search(self) -> list:
         """Submit a query to goodreads and return a list of Book objects.

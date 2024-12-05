@@ -29,3 +29,10 @@ class Stub:
     def __getattr__(self, name):
         """Return None if attr is missing."""
         return None
+
+
+def get_filecontents(filename):
+    """Return the contents of a file."""
+    with open(DATADIR.joinpath(filename)) as fp:
+        contents = fp.read()
+    return contents

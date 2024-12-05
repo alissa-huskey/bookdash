@@ -1,28 +1,78 @@
-import urllib.parse as url
+import urllib.parse as url_parse
 
 import pytest
 import requests
 import requests_mock
+from pytest_localserver.http import WSGIServer
 
 from bookdash.clients.goodreads_client import GoodreadsClient
+from tests import get_filecontents
 
 bp = breakpoint
+
+
+class MockGoodreads:
+    """Mock goodreads login responses."""
+
+    DISPATCH = {
+        "/user/sign_in": "goodreads-user-signin.html",
+        "/ap/signin": "goodreads-email-signin.html",
+        "/": "goodreads-home-authed.html",
+    }
+
+    def __init__(self, environ, start_response):
+        self.environ = environ
+        self.start = start_response
+
+    def __iter__(self):
+        url = self.environ.get("PATH_INFO")
+        file = self.DISPATCH.get(url)
+
+        if not file:
+            status = "400 Not found"
+            response_headers = [("Content-type","text/plain")]
+            contents = b"Not found."
+        else:
+            status = "200 OK"
+            response_headers = [("Content-type","text/html")]
+            contents = get_filecontents(file).encode("utf8")
+
+            self.start(status, response_headers)
+            yield contents
+
+
+@pytest.fixture
+def testserver():
+    """Server for app."""
+    server = WSGIServer(application=MockGoodreads)
+    server.start()
+    yield server
+    server.stop()
 
 
 def encode(data: dict) -> str:
     """Encode a URL."""
     return "&".join(
-        [f"{url.quote_plus(k)}={url.quote_plus(v)}"
+        [f"{url_parse.quote_plus(k)}={url_parse.quote_plus(v)}"
          for k, v in data.items()]
     )
 
 
-@pytest.mark.skip("need to rewrite--goodreads changed their auth process")
-@pytest.mark.parametrize("filecontents", [
-    {'filename': "goodreads-signin.html"}
-], indirect=True)
-def test_login(filecontents):  # noqa
-    """."""
+def test_login(testserver):
+    """
+    WHEN: .login() is called
+    THEN: it should log you in and redirect you to the goodreads homepage.
+    """
+    GoodreadsClient.BASE_URL = testserver.url
+    api = GoodreadsClient()
+    result = api.login("", "")
+
+    # get the browser's current URL and strip the query string
+    url_parts = url_parse.urlparse(result)
+    current_url = result.rstrip(f"?{url_parts.query}")
+
+    # ensure we have been redirected back to the home page
+    assert current_url == f"{GoodreadsClient.BASE_URL}/"
 
 
 @pytest.mark.parametrize("filecontents", [
@@ -87,39 +137,3 @@ def test_search_multi(filecontents):  # noqa
     params = {'q': "ender's game orson scott card", 'search[field]': "all"}
     assert response.request.path_url == f"/search?{encode(params)}"
     assert books
-
-
-@pytest.mark.skip("""need to refactor to raise exception instead of exiting""")
-@pytest.mark.parametrize("filecontents", [
-    {'filename': "todo.json"}
-], indirect=True)
-def test_failed_request(filecontents):
-    ...
-
-
-@pytest.mark.skip("need to refactor to raise exception instead of exiting")
-def test_failed_login():
-    ...
-
-
-@pytest.mark.skip("need to figure out what this should do")
-def test_search_no_results():
-    ...
-
-
-@pytest.mark.skip("need to refactor the matching code out")
-def test_search_matches():
-    ...
-
-
-@pytest.mark.skip("need to figure out how ot test this")
-def test_search_with_save():
-    ...
-
-
-@pytest.mark.skip("need to figure out what this should do")
-def test_search_query():
-    ...
-
-
-

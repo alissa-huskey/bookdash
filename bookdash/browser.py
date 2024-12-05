@@ -49,7 +49,10 @@ class Browser():
             options.add_argument(f"user-data-dir={self.user_data_dir}")
 
         options.add_argument(f"--user-agent={self.USERAGENT}")
-        options.add_argument(f"--window-size=100,100")
+        options.add_argument("--window-size=100,100")
+
+        # disable asking to save passwords
+        options.add_argument("--guest")
 
         # evade CAPCHA detection
         options.add_argument("--disable-blink-features")
@@ -66,7 +69,8 @@ class Browser():
 
         # nicer window size and position,
         # also may evade CAPCHA detection
-        driver.set_window_size(600, 800)
+        #  driver.set_window_size(600, 800)
+        driver.set_window_size(900, 1100)
         driver.set_window_position(x=0, y=0)
 
         # evade CAPCHA detection
