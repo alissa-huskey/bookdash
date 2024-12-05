@@ -1,1 +1,4 @@
 x 2024-12-04 2024-12-01 reorgainze: clients.py -> clients/goodreads.py
+x 2024-12-04 2024-12-04 @feature add config dir in ~/.config/bookdash
+x 2024-12-04 2024-12-04 @feature make default user-data-dir location in ~/.config/bookdash/{browser-name}
+x 2024-12-04 2024-02-07 move credentials from _private.py to somewhere better

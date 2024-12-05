@@ -1,4 +1,3 @@
-2024-02-07 move credentials from _private.py to somewhere better
 2024-12-01 @feature add amazon lookup
 2024-12-01 @feature add audible lookup
 2024-12-01 @feature add notes
@@ -17,3 +16,5 @@
 2024-12-02 @feature genres
 2024-12-02 @feature recommended lists
 2024-12-02 @feature parse goodreads reviews/activities page: https://www.goodreads.com/review/show/4500011844
+2024-12-04 @feature add config for user-data-dir
+2024-12-04 @feature add config command

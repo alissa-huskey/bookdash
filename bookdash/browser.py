@@ -44,8 +44,7 @@ class Browser():
 
         # this is responsible for saving and loading cookies
         # NOTE: if it remains None, there is no cookie handling
-        #       the user will most likely get flagged by goodreads
-        #       for frequent logins
+        #       the user will most likely get flagged for frequent logins
         if self.user_data_dir:
             options.add_argument(f"user-data-dir={self.user_data_dir}")
 

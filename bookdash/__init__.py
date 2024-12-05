@@ -1,4 +1,4 @@
-"""."""
+"""Bookdash module."""
 
 import logging
 from functools import partialmethod
@@ -107,7 +107,6 @@ class Logger:
         self.logger.addHandler(self.handler)
 
         self.handler.setFormatter(self.raw)
-        self.initmsg()
         self.handler.setFormatter(self.normal)
 
     def __call__(self, *args, **kwargs):
