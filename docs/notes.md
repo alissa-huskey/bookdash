@@ -21,3 +21,12 @@ Headless Browsers
 
 * [A Practical Introduction to Web Scraping in Python](https://realpython.com/python-web-scraping-practical-introduction/#interact-with-html-forms)
 * [Launching a headless browser](https://www.usetrove.io/blog/headless-web-scraping-with-python/)
+
+Goodreads Books Export
+----------------------
+
+* URL: https://www.goodreads.com/review/import
+* Click: button.gr-form--compact__submitButton
+* (wait)
+* Click: div#exportFile.fileList a
+  <a href="/review_porter/export/538517/goodreads_export.csv">Your export from 12/07/2024 - 02:59</a>
