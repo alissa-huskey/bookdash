@@ -1,4 +1,6 @@
 import urllib.parse as url_parse
+from functools import partialmethod
+import pickle
 
 import pytest
 import requests
@@ -15,9 +17,9 @@ class MockGoodreads:
     """Mock goodreads login responses."""
 
     DISPATCH = {
-        "/user/sign_in": "goodreads-user-signin.html",
-        "/ap/signin": "goodreads-email-signin.html",
-        "/": "goodreads-home-authed.html",
+        "/user/sign_in": "user_signin",
+        "/ap/signin": "email_signin",
+        "/": "authorize",
     }
 
     def __init__(self, environ, start_response):
@@ -26,19 +28,39 @@ class MockGoodreads:
 
     def __iter__(self):
         url = self.environ.get("PATH_INFO")
-        file = self.DISPATCH.get(url)
+        name = self.DISPATCH.get(url)
 
-        if not file:
-            status = "400 Not found"
-            response_headers = [("Content-type","text/plain")]
-            contents = b"Not found."
-        else:
-            status = "200 OK"
-            response_headers = [("Content-type","text/html")]
-            contents = get_filecontents(file).encode("utf8")
+        if not name:
+            name = "not_found"
 
-            self.start(status, response_headers)
-            yield contents
+        method = getattr(self, name)
+        status, headers, contents = method()
+
+        headers = list(headers.items())
+
+        self.start(status, headers)
+        yield contents
+
+    def response(self, status, content_type, contents, headers={}):
+        """Send a response."""
+        headers.update({"Content-type": content_type})
+        return status, headers, contents
+
+    def success_response(self, file, headers={}):
+        """Send a successful response."""
+        contents = get_filecontents(file).encode("utf8")
+        return self.response("200 OK", "text/html", contents, headers)
+
+    def authorize(self):
+        """Set session-id cookie then respond with success."""
+        file = "goodreads-home-authed.html"
+        headers = {"Set-Cookie": "session-id=12345"}
+        return self.success_response(file, headers)
+
+    user_signin = partialmethod(success_response, "goodreads-user-signin.html")
+    email_signin = partialmethod(success_response, "goodreads-email-signin.html")
+    not_found = partialmethod(response, "400 Not Found", "text/plain", b"Not found.")
+
 
 
 @pytest.fixture
@@ -58,21 +80,27 @@ def encode(data: dict) -> str:
     )
 
 
-def test_login(testserver):
+def test_login(testserver, tmp_path):
     """
     WHEN: .login() is called
     THEN: it should log you in and redirect you to the goodreads homepage.
     """
+
     GoodreadsClient.BASE_URL = testserver.url
+    GoodreadsClient.BROWSER_DIR = tmp_path / "browser"
+    GoodreadsClient.COOKIES_FILE = tmp_path / "cookies" / "goodreads.pkl"
+
     api = GoodreadsClient()
-    result = api.login("", "")
+    result = api.login("", "") # empty username/pwd to avoid slow typing
 
     # get the browser's current URL and strip the query string
     url_parts = url_parse.urlparse(result)
     current_url = result.rstrip(f"?{url_parts.query}")
 
     # ensure we have been redirected back to the home page
-    assert current_url == f"{GoodreadsClient.BASE_URL}/"
+    assert current_url == f"{testserver.url}/"
+    assert api.cookie_jar.has("session-id")
+    assert api.COOKIES_FILE.is_file()
 
 
 @pytest.mark.parametrize("filecontents", [

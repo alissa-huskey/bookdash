@@ -33,6 +33,7 @@ class Browser():
     def __init__(self, headless=True, user_data_dir=None):
         self.headless = headless
         self.user_data_dir = user_data_dir
+        self.responses = []
 
     @property
     def options(self):
@@ -117,7 +118,14 @@ class Browser():
         """Send a get request and return response."""
         self.driver.get(url)
         if self.driver.last_request:
-            return self.driver.last_request.response
+            self.responses.append(self.driver.last_request.response)
+            return self.last_response
+
+    @property
+    def last_response(self):
+        if not self.responses:
+            return
+        return self.responses[-1]
 
     def quit(self):
         """Quit the browser driver if it has been started."""

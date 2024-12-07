@@ -6,8 +6,9 @@ from rich import print as rprint
 from tabulate import tabulate
 from xdg.BaseDirectory import save_config_path
 
-from bookdash import abort, clients, error, log
-from bookdash.config import Config, init_config
+from bookdash import abort, error, log
+from bookdash.clients.goodreads_client import GoodreadsClient
+from bookdash.config import Config, GoodreadsConfig, init_config
 
 bp = breakpoint
 
@@ -62,7 +63,9 @@ def search(**kwargs):
     if not any(kwargs.values()):
         abort("Received no search arguments.")
 
-    api = clients.Client(**kwargs)
+    creds = GoodreadsConfig()
+    api = GoodreadsClient(**kwargs)
+    #  api.login(creds.email, creds.pwd)
     books = api.search()
     rows = []
     for i, book in enumerate(books, 1):
@@ -78,24 +81,3 @@ def search(**kwargs):
 
     print()
     print(tabulate(rows, headers="keys"))
-
-    row = None
-
-    if len(rows) == 1:
-        row = rows [0]
-
-    while not row:
-        response = prompt("Book #> ", type=int)
-
-        try:
-            row = rows[response-1]
-        except IndexError:
-            error("Invalid book number. Try again.")
-
-    show(row.id)
-
-
-def show(url):
-    """Show book details."""
-
-    rprint(row)

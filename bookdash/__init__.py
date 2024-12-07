@@ -161,4 +161,4 @@ class Logger:
 
 
 Logger.WIDTH = environ.get("COLUMNS", Logger.WIDTH)
-log = Logger()
+log = Logger(level="info")

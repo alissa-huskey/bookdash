@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+from confz import DataSource
 
 __all__ = ["DATADIR", "Stub"]
 
@@ -36,3 +37,8 @@ def get_filecontents(filename):
     with open(DATADIR.joinpath(filename)) as fp:
         contents = fp.read()
     return contents
+
+
+def data_source(**kwargs):
+    """Return a confz.DataSource source."""
+    return DataSource(dict(**kwargs))

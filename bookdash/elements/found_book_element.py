@@ -16,7 +16,7 @@ class FoundBookElement(BookElement):
         if self.element is None:
             return
 
-        self.id = self.attr('.//div[@class="u-anchorTarget"]', "id")
+        self.id = self.attr(".//div[@class='u-anchorTarget']", "id")
         self.author = self.first('.//a[@class="authorName"]/span/text()')
         self.title = self.first('.//a[@class="bookTitle"]/span/text()')
         self.url = self.first('.//a[@class="bookTitle"]/@href')

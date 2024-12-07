@@ -1,19 +1,18 @@
 from pathlib import Path
 
-from confz import DataSource
 
 from bookdash.config import (DEFAULT_CONFIG_DIR, DEFAULT_CONFIG_FILE,
                              DEFAULT_CONFIG_FILENAME, DEFAULT_DATA_DIR, Config,
                              ConfigFile, GoodreadsConfig)
 
+from tests import data_source
 
-def data(**kwargs):
-    """Return a data source."""
-    return DataSource(data=dict(**kwargs))
+
+bp = breakpoint
 
 
 def test_config_defaults():
-    with Config.change_config_sources(data()):
+    with Config.change_config_sources(data_source()):
         config = Config()
 
         assert config.config_file == DEFAULT_CONFIG_FILE
@@ -28,7 +27,7 @@ def test_config_config_dir_changed():
     THEN: config_file should be config_dir/DEFAULT_CONFIG_FILENAME
     AND: config_dir should be the one that is set
     """
-    with Config.change_config_sources(data(config_dir="/a/b/c")):
+    with Config.change_config_sources(data_source(config_dir="/a/b/c")):
         config = Config()
 
         assert config.config_file == Path("/a/b/c") / DEFAULT_CONFIG_FILENAME
@@ -43,8 +42,8 @@ def test_config_config_file_changed():
     AND: config_dir should be config_file.parent
     """
     config_file = "/a/b/c/bookdash.toml"
-    with ConfigFile.change_config_sources(data(config_file=config_file)):
-        with Config.change_config_sources(data()):
+    with ConfigFile.change_config_sources(data_source(config_file=config_file)):
+        with Config.change_config_sources(data_source()):
             config = Config()
 
             assert config.config_file == Path("/a/b/c/bookdash.toml")
@@ -59,8 +58,8 @@ def test_config_config_file_and_config_dir_changed():
     AND: config_dir should be config_file.parent
     """
     config_file = "/a/b/c/bookdash.toml"
-    with ConfigFile.change_config_sources(data(config_file=config_file)):
-        with Config.change_config_sources(data(config_dir="/d/e/f")):
+    with ConfigFile.change_config_sources(data_source(config_file=config_file)):
+        with Config.change_config_sources(data_source(config_dir="/d/e/f")):
             config = Config()
 
             assert config.config_file == Path(config_file)

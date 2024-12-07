@@ -89,11 +89,14 @@ class GoodreadsConfig(BaseConfig):
 
 
 def shorten_home(path):
+    """Replace /home/USER with ~ symbol."""
     if not isinstance(path, Path):
         return path
     if not path.is_relative_to(Path.home()):
-        return path
-    return "~/" + str(path.relative_to(Path.home()))
+        return str(path)
+    home = Path("~/").expanduser()
+    return str(home) + str(path.relative_to(Path.home()))
+
 
 def init_config(path):
     """Initialize config file."""

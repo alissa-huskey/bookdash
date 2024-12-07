@@ -1,5 +1,6 @@
 """Goodreads client module."""
 
+from datetime import datetime
 from functools import partialmethod
 
 import requests
@@ -10,7 +11,10 @@ from bookdash import abort, log
 from bookdash.books import Book
 from bookdash.browser import Browser
 from bookdash.clients.base_client import BaseClient
+from bookdash.config import Config
+from bookdash.cookie_jar import CookieJar
 from bookdash.elements.element import Element
+from bookdash.elements.found_book_element import FoundBookElement
 
 bp = breakpoint
 
@@ -21,6 +25,10 @@ class GoodreadsClient(BaseClient):
     """Goodreads client."""
 
     BASE_URL = "https://goodreads.com"
+    COOKIES_FILE = Config().data_dir / "cookies" / "goodreads.pkl"
+    BROWSER_DIR = Config().data_dir / "browser"
+
+    cookie_jar = None
 
     def __init__(self, **kwargs):
         """Goodreads client.
@@ -51,35 +59,25 @@ class GoodreadsClient(BaseClient):
 
         super().__init__(**kwargs)
 
-    def save_cookies(self, cookies):
-        """Save cookies to pickled file."""
-        # open cookie file
-        # write pickled cookies
-
-    def load_cookies(self):
-        """Load cookies from pickled file."""
-        # open cookie file if it exists
-        # unpickle
-        # ensure they're not expired
-        # add to session
-        # return cookies
-
     def login(self, email, password):
         """Login to goodreads."""
         # if we have valid cookies cached, we're already logged in
-        if self.load_cookies():
+        jar = self.cookie_jar = CookieJar(file=self.COOKIES_FILE)
+        jar.load()
+        if jar.ok("session-token"):
             return True
 
-        browser = self.browser = Browser(user_data_dir="tmp/selenium")
+        browser = self.browser = Browser(user_data_dir=str(self.BROWSER_DIR))
 
         # go to the user-facing signin page
         browser.get(f"{self.BASE_URL}/user/sign_in")
 
         # check if the user is already signed in
         # (if they have a session-token cookie and are redirected to the home page)
-        cookies = [c["name"] for c in browser.get_cookies()]
-        if "session-token" in cookies and browser.current_url == f"{self.BASE_URL}/":
-            self.save_cookies(cookies)
+
+        jar.cookies = browser.get_cookies()
+        if jar.ok("session-token") and browser.current_url == f"{self.BASE_URL}/":
+            jar.save(self.session)
             return True
 
         # click the "Sign in with email" button
@@ -108,7 +106,8 @@ class GoodreadsClient(BaseClient):
         assert browser.driver.title != f"Authentication required", "Problem submitting signin (possibly CAPTCHA)."
 
         # save the cookies
-        self.save_cookies(browser.get_cookies())
+        jar.cookies = browser.get_cookies()
+        jar.save(self.session)
 
         current_url = browser.current_url
         browser.quit()
@@ -143,7 +142,8 @@ class GoodreadsClient(BaseClient):
 
         books = []
         for elm in doc.xpath('//tr[@itemtype="http://schema.org/Book"]'):
-            book = Book(elm)
+            found_book = FoundBookElement(elm)
+            book = Book(elm, id=found_book.id)
             book.match(self.query)
             books.append(book)
 
