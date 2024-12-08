@@ -1,6 +1,6 @@
 from os import environ
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import toml
 from confz import BaseConfig, EnvSource, FileSource
@@ -9,6 +9,7 @@ from pydantic import (EmailStr, Field, computed_field, field_validator,
 from pydantic.functional_validators import AfterValidator
 from typing_extensions import Annotated
 from xdg.BaseDirectory import xdg_config_home, xdg_data_home
+
 
 DEFAULT_CONFIG_FILENAME = "bookdash.toml"
 DEFAULT_CONFIG_DIR = Path(xdg_config_home) / "bookdash"
@@ -22,83 +23,15 @@ DEFAULT_SOURCES = (
     FileSource(file_from_env="BOOKDASH_CONFIG_FILE", optional=True),
 )
 
-
-class ConfigFile(BaseConfig):
-    """Just handles the config file location."""
-    config_file: Path = DEFAULT_CONFIG_FILE
-
-    CONFIG_SOURCES = EnvSource(prefix="BOOKDASH_", allow="config_file")
+PathLike = Union[Path, str]
 
 
-class Config(BaseConfig):
-    """Class for storing user config settings."""
-    config_dir: Annotated[Path, Field(validate_default=True)] = ConfigFile().config_file.parent
-    data_dir: Path = DEFAULT_DATA_DIR
-
-    CONFIG_SOURCES = [
-        *DEFAULT_SOURCES,
-        EnvSource(prefix="BOOKDASH_", allow_all=True),
-    ]
-
-    @computed_field
-    @property
-    def config_file(self) -> Path:
-        """Get config_file.
-
-        Populate from ConfigFile(). If self.config_dir is set by the user and
-        config_file is not, config_file should be realiteve to config_dir."""
-        file = ConfigFile().config_file
-
-        if file == DEFAULT_CONFIG_FILE and self.config_dir != DEFAULT_CONFIG_DIR:
-            file = self.config_dir / DEFAULT_CONFIG_FILENAME
-
-        return file
-
-    @field_validator("config_dir")
-    def validate_config_dir(cls, config_dir) -> Path:
-        """Get config_dir.
-
-        config_dir should be relative to config_file if config_file is set."""
-        config_file = ConfigFile().config_file
-
-        if config_file != DEFAULT_CONFIG_FILE:
-            config_dir = config_file.parent
-
-        return config_dir
-
-    #  @model_validator(mode="after")
-    #  @classmethod
-    #  def config_dir_validator(self, v: Path) -> Path:
-    #      """Overwrite the config_dir with the directory the config file is in if
-    #      the config file has been set and """
-    #      if self.config_file == DEfAULT_CONFIG_FILE:
-    #          return
-
-    #      return self.config_file.parent
-
-class GoodreadsConfig(BaseConfig):
-    """Class for storing goodreads credentials."""
-
-    email: Optional[EmailStr] = None
-    pwd: Optional[str] = None
-
-    CONFIG_SOURCES = [
-        *DEFAULT_SOURCES,
-        EnvSource(prefix="GOODREADS_", allow_all=True),
-    ]
+def expand_path(path: Path) -> Path:
+    """Expand the '~' and make the path absolute."""
+    return path.expanduser().absolute()
 
 
-def shorten_home(path):
-    """Replace /home/USER with ~ symbol."""
-    if not isinstance(path, Path):
-        return path
-    if not path.is_relative_to(Path.home()):
-        return str(path)
-    home = Path("~/").expanduser()
-    return str(home) + str(path.relative_to(Path.home()))
-
-
-def init_config(path):
+def init_config(path: Path) -> None:
     """Initialize config file."""
     config = Config().model_dump()
     config["goodreads_email"] = "YOUR-EMAIL"
@@ -146,3 +79,105 @@ def init_config(path):
 
     text = "\n".join(prefix) + config_text + "\n".join(suffix)
     path.write_text(text)
+
+
+class ConfigFile(BaseConfig):
+    """Just handles the config file location.
+
+    Seperate from Config class as this value cannot be in the config file and
+    comes only from the environment variable (for obvious reasons), and the
+    Config class is dependent on the value if set.
+
+    Sources include:
+        * indirectly the XDG_CONFIG_HOME and XDG_DATA_HOME environment
+          variables, obtained via xdg module.
+
+    Precedent:
+        * BOOKDASH_CONFIG_FILE env var supersedes XDG_CONFIG_HOME env var
+    """
+    config_file: Path = Field(
+        validate_default=True,
+        default=DEFAULT_CONFIG_FILE,
+    )
+
+    _config_file_validator = field_validator("config_file")(expand_path)
+
+    CONFIG_SOURCES = EnvSource(prefix="BOOKDASH_", allow="config_file")
+
+
+class Config(BaseConfig):
+    """Class for storing user config settings.
+
+    Sources include:
+        * the config file at its default location if present
+        * the config file set by the enviornment variable BOOKDASH_CONFIG_FILE
+          if set and present
+        * envionment variables with the prefix BOOKDASH_ if set
+        * indirectly the XDG_CONFIG_HOME and XDG_DATA_HOME environment
+          variables, obtained via xdg module.
+        * value of ConfigFile().config_file
+
+    Precedent:
+        * Environment variables supersede config file settings.
+        * bookdash_* settings supersede XDG_* env vars
+        * config_file supersede config_dir
+    """
+    config_dir: Annotated[
+        Path, Field(validate_default=True)
+    ] = ConfigFile().config_file.parent
+    data_dir: Path = Field(DEFAULT_DATA_DIR, validate_default=True)
+
+    _data_dir_fixer = field_validator("data_dir")(expand_path)
+
+    CONFIG_SOURCES = [
+        *DEFAULT_SOURCES,
+        EnvSource(prefix="BOOKDASH_", allow_all=True),
+    ]
+
+    @computed_field
+    @property
+    def config_file(self) -> Path:
+        """Get config_file.
+
+        Populate from ConfigFile(). If self.config_dir is set by the user and
+        config_file is not, config_file should be realiteve to config_dir."""
+        file = ConfigFile().config_file
+
+        if file == DEFAULT_CONFIG_FILE and self.config_dir != DEFAULT_CONFIG_DIR:
+            file = self.config_dir / DEFAULT_CONFIG_FILENAME
+
+        return file
+
+    @field_validator("config_dir")
+    def validate_config_dir(cls, config_dir: PathLike) -> Path:
+        """Get config_dir.
+
+        config_dir should be relative to config_file if config_file is set."""
+        config_file = ConfigFile().config_file
+
+        if config_file != DEFAULT_CONFIG_FILE:
+            config_dir = config_file.parent
+
+        return expand_path(config_dir)
+
+
+class GoodreadsConfig(BaseConfig):
+    """Class for storing goodreads credentials."""
+
+    email: Optional[EmailStr] = None
+    pwd: Optional[str] = None
+
+    CONFIG_SOURCES = [
+        *DEFAULT_SOURCES,
+        EnvSource(prefix="GOODREADS_", allow_all=True),
+    ]
+
+
+def shorten_home(path: PathLike) -> str:
+    """Replace /home/USER with ~ symbol."""
+    if not isinstance(path, Path):
+        return path
+    if not path.is_relative_to(Path.home()):
+        return str(path)
+    home = Path("~/").expanduser()
+    return str(home) + str(path.relative_to(Path.home()))

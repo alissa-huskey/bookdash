@@ -1,7 +1,12 @@
 import pytest
+import requests
 from pytest_localserver.http import WSGIServer
 
-from myproject import make_request
+
+def make_request(url):
+    """Make a web request and return the text content."""
+    response = requests.get(url)
+    return response.text
 
 
 class SimpleApp:

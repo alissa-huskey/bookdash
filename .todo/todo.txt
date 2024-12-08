@@ -1,14 +1,12 @@
 2024-12-01 @feature add amazon lookup
 2024-12-01 @feature add audible lookup
 2024-12-01 @feature add notes
-2024-12-01 store info to database
-2024-12-01 @bug @test test_clients::test_login -- mock request failure
 2024-12-01 reorgainze: elements/*.py -> parsers/goodreads/*.py
 2024-12-02 @feature notes on authors
-2024-12-02 @feature read next lists -- notes, status (bought, available), reason, account
+2024-12-02 @feature "read next" lists -- notes, status (bought, available), reason, account
 2024-12-02 @feature ratings (PG/PG-13/R/X)
-2024-12-02 @feature don't read lists
-2024-12-02 @feature browser plugin -- like fakespot for audible; don't read
+2024-12-02 @feature "don't read" lists
+2024-12-02 @feature browser plugin -- like fakespot for audible; "don't read"
 2024-12-02 @feature owned on (kindle/audible/physical, which account)
 2024-12-02 @feature recommended by
 2024-12-02 @feature synopsis
@@ -18,3 +16,4 @@
 2024-12-02 @feature parse goodreads reviews/activities page: https://www.goodreads.com/review/show/4500011844
 2024-12-04 @feature add config for user-data-dir
 2024-12-04 @feature add config command
+2024-12-06 @feature `book view` like `gh repo view --web`
