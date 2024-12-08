@@ -35,3 +35,4 @@
 (Z) 2024-12-08 @feature @someday download audible wishlist
 2024-12-08 @feature @ux for titles like Switch: How to Change Things When Change Is Hard split title from subtitle
 2024-12-08 @refactor add normalized strings view to db for title/author/series etc
+2024-12-08 @ux remove --save flag and replace with --debug

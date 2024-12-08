@@ -10,18 +10,19 @@ tl;dr
 -----
 
 ```
-dash "Ender's Game"
+books "Ender's Game"
 ```
 
 Usage
 -----
 
 ```
-Usage: dash [<filters>] [<title>]
+Usage: books [<filters>] [<title>]
 
   Search for book and print details.
 
 Options:
+  -c, --init-config       initialize config file and print path
   -t, --title TEXT        filter by book title
   -a, --author TEXT       filter by book author
   -s, --series TEXT       filter by book series
@@ -55,6 +56,6 @@ See also [XDG Base Directory Specification](https://specifications.freedesktop.o
 Status
 ------
 
-**Pre-Alpha**: broken
+**Pre-Alpha**
 
-Goodreads authentication needs to be refactored.
+In development. Works for me, but quirky and unreliable.
