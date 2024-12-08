@@ -4,3 +4,4 @@ x 2024-12-04 2024-12-04 @feature make default user-data-dir location in ~/.confi
 x 2024-12-04 2024-02-07 move credentials from _private.py to somewhere better
 x 2024-12-07 2024-12-01 @bug @test test_clients::test_login -- mock request failure
 x 2024-12-07 2024-12-01 store info to database
+x 2024-12-08 2024-12-04 @feature add config for user-data-dir

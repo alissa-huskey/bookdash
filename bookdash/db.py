@@ -2,6 +2,7 @@
 
 from functools import cached_property
 
+from sqlalchemy.sql.elements import ClauseElement
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 from bookdash.config import Config
@@ -32,8 +33,8 @@ class DB():
         self.DB_FILE.parent.mkdir(parents=True, exist_ok=True)
         return create_engine(
             self.sqlite_url,
-            echo=True,
             connect_args={"check_same_thread": False},
+            #  echo=True,
         )
 
     @property
@@ -44,3 +45,12 @@ class DB():
     def create(self):
         """Create SQL database and tables."""
         SQLModel.metadata.create_all(self.engine)
+
+    def select_one(self, model: type, *conditions: ClauseElement) -> dict:
+        """Return one row or empty dictionary from the database."""
+        with self.session as session:
+            query = select(model).where(*conditions)
+            results = session.exec(query)
+            row = results.one_or_none() or {}
+
+        return row

@@ -89,3 +89,7 @@ class Book:
             self.matches[name] = ratio
 
         self.score = sum(self.matches.values()) / len(self.matches.values())
+
+    def to_dict(self) -> dict:
+        """Return a dictionary of all attributes and values."""
+        return self.__dict__

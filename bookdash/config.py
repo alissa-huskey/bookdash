@@ -77,6 +77,8 @@ def init_config(path: Path) -> None:
         "",
     )
 
+    path = path.expanduser()
+    path.parent.mkdir(parents=True, exist_ok=True)
     text = "\n".join(prefix) + config_text + "\n".join(suffix)
     path.write_text(text)
 

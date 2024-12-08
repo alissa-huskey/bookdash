@@ -34,6 +34,7 @@ confz = "^2.0.1"
 pydantic = "^2.10.3"
 email-validator = "^2.2.0"
 sqlmodel = "^0.0.22"
+html2text = "^2024.2.26"
 
 [tool.poetry.scripts]
 books = "bookdash.cli:search"

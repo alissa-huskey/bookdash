@@ -31,7 +31,6 @@ class ProgramError(BookdashException):
 def error(*args):
     """Print message to stderr."""
     print(style("Error", fg="red"), *args, file=stderr)
-    exit(1)
 
 
 def abort(*args):

@@ -114,14 +114,7 @@ class GoodreadsClient(BaseClient):
         return current_url
 
     def search(self) -> list:
-        """Submit a query to goodreads and return a list of Book objects.
-
-        Examples
-        --------
-        >>> api = GoodreadsClient(title="ender's game", author="orson scott card")
-        >>> api.search()
-        [Book('Ender’s Game')]
-        """
+        """Submit a query to goodreads and return a list of Book objects."""
         query = " ".join(self.query.values())
         response = self.get(
             "https://www.goodreads.com/search",
@@ -131,7 +124,7 @@ class GoodreadsClient(BaseClient):
         # log(path_url=response.request.path_url)
         log(url=response.url)
         log(
-            prefix="Client.search() query:", query=query,
+            prefix="{self.__class__.__name__}.search() query:", query=query,
             search_by=self.search_by
         )
 
@@ -150,13 +143,13 @@ class GoodreadsClient(BaseClient):
         books = sorted(books, key=lambda b: b.score, reverse=True)
         threshold = 1
         matches = None
-        while not matches:
-            matches = [b for b in books if b.score >= threshold]
-            if threshold <= 0:
-                break
-            threshold -= 0.15
+        #  while not matches:
+        #      matches = [b for b in books if b.score >= threshold]
+        #      if threshold <= 0:
+        #          break
+        #      threshold -= 0.15
 
-        books = matches
+        #  books = matches
         return books
 
     def show(self):
